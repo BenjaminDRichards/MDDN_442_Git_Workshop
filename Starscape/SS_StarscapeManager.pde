@@ -7,10 +7,10 @@ class SS_StarscapeManager
   private SSGenStars ssGenStars;
   
   
-  SS_StarscapeManager()
+  SS_StarscapeManager(int resX, int resY)
   {
     // Initialise graphics
-    resizeCanvas(1024, 1024);
+    resizeCanvas(resX, resY);
     
     // Initialise starscape generators
     ssGenSpace = new SSGenSpace(canvas);
