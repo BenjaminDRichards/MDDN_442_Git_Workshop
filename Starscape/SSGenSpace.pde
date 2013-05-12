@@ -7,7 +7,7 @@ class SSGenSpace extends SSGen
   {
     super(canvas);
     
-    bgCol = color(0,0,0);
+    bgCol = color(random(32), random(32), random(32));
   }
   
   
