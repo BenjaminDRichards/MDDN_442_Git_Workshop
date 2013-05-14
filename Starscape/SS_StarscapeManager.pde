@@ -54,5 +54,13 @@ class SS_StarscapeManager
   }
   // generateStarscape
   
+  
+  public void moveView(PVector dPos)
+  // Moves the viewpoint on the starscape
+  {
+    ssGenStars.moveView(dPos);
+  }
+  // moveView
+  
 }
 // StarscapeManager

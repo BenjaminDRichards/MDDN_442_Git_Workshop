@@ -3,48 +3,55 @@ import java.util.*;
 class SSGenStars extends SSGen
 {
   private ArrayList features;
+  private PVector viewpointOffset;
   
-  int STELLAR_POPULATION = 8192;
-  float STAR_STEP = 0.15;
-  float MAX_FEATURE_SIZE = 64;
+  // Setup canvas bounds
+  PVector lowBound;
+  PVector highBound;
+  
+  private int STELLAR_POPULATION = 16384;
+  private float STAR_STEP = 0.25;
+  private float MAX_FEATURE_SIZE = 64;
   
 
   SSGenStars(PGraphics canvas)
   {
     super(canvas);
     
+    // Setup data
     features = new ArrayList();
+    viewpointOffset = new PVector(0,0,0);
+    
+    // Setup canvas bounds
+    lowBound = new PVector( getCanvas().width * -1.0,  getCanvas().height * -1.0,  0 );
+    highBound = new PVector( getCanvas().width * 2.0,  getCanvas().height * 2.0,  getCanvas().height * 3 );
+    
+    // Generate and subdivide features
+    genDrunkStars(STELLAR_POPULATION);
+    features = breakdownFeatures(features);
+    features = quickSortFeatures(features);
   }
 
 
   public void render()
+  // Draw some stars
   {
     getCanvas().beginDraw();
-
-    // Draw some stars
-
-    // Style
-    getCanvas().fill(255);
-    getCanvas().noStroke();
-    
-    // Generate astronomical features
-    genDrunkStars(STELLAR_POPULATION);
-    
-    // Add detail to astronomical features
-    println("Features " + features.size() );
-    features = breakdownFeatures(features);
-    println("Features " + features.size() );
-    
-    // Depth sort features
-    features = quickSortFeatures(features);
     
     // Render astronomical features
     renderFeatures();
     
-    
     getCanvas().endDraw();
   }
   // render
+  
+  
+  public void moveView(PVector dpos)
+  // Change visible offset
+  {
+    viewpointOffset.add(dpos);
+  }
+  // moveView
   
   
   /*
@@ -66,10 +73,6 @@ class SSGenStars extends SSGen
     // Setup canvas-relative feature scalars
     float featureScale = getCanvas().height / 128.0;
     float stepMax = getCanvas().width * STAR_STEP;
-    
-    // Setup canvas bounds
-    PVector lowBound = new PVector( getCanvas().width * -0.25,  getCanvas().height * -0.25,  0 );
-    PVector highBound = new PVector( getCanvas().width * 1.25,  getCanvas().height * 1.25,  getCanvas().height * 2 );
     
     // Setup positional data
     float x = getCanvas().width / 2.0;
@@ -265,6 +268,11 @@ class SSGenStars extends SSGen
       // Apparent size
       float r = m_magnitude;
       
+      // Offset
+      float zNorm = m_pos.z / highBound.z;
+      getCanvas().pushMatrix();
+      getCanvas().translate(viewpointOffset.x * zNorm, viewpointOffset.y * zNorm);
+      
       // Lifecycle analysis
       
       
@@ -274,7 +282,8 @@ class SSGenStars extends SSGen
         {
           // Dust cloud
           getCanvas().noStroke();
-          getCanvas().fill(0, 32);
+          float a = 32 * m_density * (1.5 - zNorm);
+          getCanvas().fill(0, a);
           r *= NEB_SCALE;
         }
         else
@@ -283,7 +292,7 @@ class SSGenStars extends SSGen
           getCanvas().colorMode(HSB);
           getCanvas().noStroke();
           float h = 255 - 255 * abs(m_lifeCycle * 2);
-          float a = 4 * m_density;
+          float a = 4 * m_density * (1.5 - zNorm);
           getCanvas().fill(h,  255, 255, a);
           r *= NEB_SCALE;
         }
@@ -304,6 +313,10 @@ class SSGenStars extends SSGen
         
         getCanvas().popStyle();
       }
+      
+      
+      // Terminate offset
+      getCanvas().popMatrix();
     }
     // render
     
